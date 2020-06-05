@@ -156,10 +156,7 @@ func (u *UI) Layout(gtx layout.Context) {
 	if u.fab.Clicked() {
 		if u.selectedUser != nil {
 			u.selectedUser = nil
-		} else {
-			u.users = append([]*user{u.users[1], u.users[2]}, u.users...)
-			u.usersList.Position.First += 2
-		}
+		} 
 	}
 
 	if u.selectedUser != nil {
@@ -196,9 +193,9 @@ func Commit(user *user, msg string) layout.Widget {
 }
 
 func User(user *user, click *gesture.Click) layout.Widget {
-	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Border(0, 0, 0, 1, rgb(0xe0e0e0)), fn.Margin(8), fn.OnClick(click)},
+	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Margin(8), fn.OnClick(click)},
 		fn.FlexChild{fn.Rigid(false), []S{fn.Margin(8), fn.Rounded(36)}, Avatar(user)},
-		fn.FlexChild{fn.Rigid(false), nil,
+		fn.FlexChild{fn.Rigid(false), []S{fn.Border(0, 0, 0, 1, rgb(0xe0e0e0)), fn.Margin4(0, 0, 0, 16)}, 
 			fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,
 				fn.FlexChild{fn.Rigid(false), nil,
 					fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Baseline}, nil,
