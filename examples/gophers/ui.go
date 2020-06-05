@@ -67,6 +67,7 @@ var theme *material.Theme
 type (
 	C = layout.Context
 	D = layout.Dimensions
+	S = fn.Style
 )
 
 func init() {
@@ -181,30 +182,30 @@ func UserPage(u *UI) layout.Widget {
 
 	main := fn.Stack(layout.Stack{Alignment: layout.SE}, nil,
 		fn.StackChild{fn.Expanded(false), nil, content},
-		fn.StackChild{fn.Stacked(), []fn.Style{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon2).Layout},
+		fn.StackChild{fn.Stacked(), []S{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon2).Layout},
 	)
 
 	return main
 }
 
 func Commit(user *user, msg string) layout.Widget {
-	return fn.Flex(layout.Flex{Axis: layout.Horizontal}, []fn.Style{fn.Margin4(8, 16, 8, 0)},
-		fn.FlexChild{fn.Rigid(false), []fn.Style{fn.Rounded(48)}, Avatar(user)},
-		fn.FlexChild{fn.Flexed(1), []fn.Style{fn.Margin4(8, 0, 0, 0)}, fn.Label(material.Caption(theme, msg))},
+	return fn.Flex(layout.Flex{Axis: layout.Horizontal}, []S{fn.Margin4(8, 16, 8, 0)},
+		fn.FlexChild{fn.Rigid(false), []S{fn.Rounded(48)}, Avatar(user)},
+		fn.FlexChild{fn.Flexed(1), []S{fn.Margin4(8, 0, 0, 0)}, fn.Label(material.Caption(theme, msg))},
 	)
 }
 
 func User(user *user, click *gesture.Click) layout.Widget {
-	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []fn.Style{fn.Margin(8), fn.OnClick(click)},
-		fn.FlexChild{fn.Rigid(false), []fn.Style{fn.Margin(8), fn.Rounded(36)}, Avatar(user)},
+	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Margin(8), fn.OnClick(click)},
+		fn.FlexChild{fn.Rigid(false), []S{fn.Margin(8), fn.Rounded(36)}, Avatar(user)},
 		fn.FlexChild{fn.Rigid(false), nil,
 			fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,
 				fn.FlexChild{fn.Rigid(false), nil,
 					fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Baseline}, nil,
 						fn.FlexChild{fn.Rigid(false), nil, material.Body1(theme, user.name).Layout},
-						fn.FlexChild{fn.Flexed(1), []fn.Style{fn.Direction(layout.E), fn.Margin4(2, 0, 0, 0)}, material.Caption(theme, "3 hours ago").Layout},
+						fn.FlexChild{fn.Flexed(1), []S{fn.Direction(layout.E), fn.Margin4(2, 0, 0, 0)}, material.Caption(theme, "3 hours ago").Layout},
 					)},
-				fn.FlexChild{fn.Rigid(false), []fn.Style{fn.Margin4(0, 4, 0, 0)}, material.Caption(theme, user.company).Layout},
+				fn.FlexChild{fn.Rigid(false), []S{fn.Margin4(0, 4, 0, 0)}, material.Caption(theme, user.company).Layout},
 			)},
 	)
 
@@ -213,9 +214,9 @@ func User(user *user, click *gesture.Click) layout.Widget {
 
 func Users(u *UI) layout.Widget {
 	content := fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,
-		fn.FlexChild{fn.Rigid(true), []fn.Style{fn.Margin(16), fn.Size(400, 200)}, material.Editor(theme, u.edit, "Hint").Layout},
-		fn.FlexChild{fn.Rigid(true), []fn.Style{fn.Margin(16)}, material.Editor(theme, u.edit2, "Hint").Layout},
-		fn.FlexChild{fn.Rigid(false), []fn.Style{fn.Background(rgb(0xf2f2f2))}, fn.Styled(material.Caption(theme, "GOPHERS").Layout, fn.Margin(8))},
+		fn.FlexChild{fn.Rigid(true), []S{fn.Margin(16), fn.Size(400, 200)}, material.Editor(theme, u.edit, "Hint").Layout},
+		fn.FlexChild{fn.Rigid(true), []S{fn.Margin(16)}, material.Editor(theme, u.edit2, "Hint").Layout},
+		fn.FlexChild{fn.Rigid(false), []S{fn.Background(rgb(0xf2f2f2))}, fn.Styled(material.Caption(theme, "GOPHERS").Layout, fn.Margin(8))},
 		fn.FlexChild{fn.Flexed(1), nil,
 			fn.List(u.usersList, nil, len(u.users), func(gtx C, index int) D {
 				return User(u.users[index], &u.userClicks[index])(gtx)
@@ -224,7 +225,7 @@ func Users(u *UI) layout.Widget {
 
 	main := fn.Stack(layout.Stack{Alignment: layout.SE}, nil,
 		fn.StackChild{fn.Expanded(false), nil, content},
-		fn.StackChild{fn.Stacked(), []fn.Style{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon).Layout},
+		fn.StackChild{fn.Stacked(), []S{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon).Layout},
 	)
 
 	return main
