@@ -189,14 +189,14 @@ func UserPage(u *UI) layout.Widget {
 }
 
 func Commit(user *user, msg string) layout.Widget {
-	return fn.Flex(layout.Flex{Axis: layout.Horizontal}, []S{fn.Margin4(8, 16, 8, 0)},
+	return fn.Flex(layout.Flex{Axis: layout.Horizontal}, []S{fn.Border(0, 0, 0, 1, rgb(0xa0b0c0)), fn.Margin4(8, 16, 8, 8)},
 		fn.FlexChild{fn.Rigid(false), []S{fn.Rounded(48)}, Avatar(user)},
 		fn.FlexChild{fn.Flexed(1), []S{fn.Margin4(8, 0, 0, 0)}, fn.Label(material.Caption(theme, msg))},
 	)
 }
 
 func User(user *user, click *gesture.Click) layout.Widget {
-	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Margin(8), fn.OnClick(click)},
+	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Border(0, 0, 0, 1, rgb(0xe0e0e0)), fn.Margin(8), fn.OnClick(click)},
 		fn.FlexChild{fn.Rigid(false), []S{fn.Margin(8), fn.Rounded(36)}, Avatar(user)},
 		fn.FlexChild{fn.Rigid(false), nil,
 			fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,

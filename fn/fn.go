@@ -44,7 +44,7 @@ func Margin(x float32) Style {
 func Margin4(left, top, right, bottom float32) Style {
 	return func(w layout.Widget) layout.Widget {
 		return func(gtx C) D {
-			in := layout.Inset{Top: unit.Dp(top), Right: unit.Dp(right), Left: unit.Dp(left)}
+			in := layout.Inset{Top: unit.Dp(top), Right: unit.Dp(right), Left: unit.Dp(left), Bottom: unit.Dp(bottom)}
 			return in.Layout(gtx, w)
 		}
 	}
@@ -65,6 +65,42 @@ func Direction(d layout.Direction) Style {
 	return func(w layout.Widget) layout.Widget {
 		return func(gtx C) D {
 			return d.Layout(gtx, w)
+		}
+	}
+}
+
+func drawRect(ops *op.Ops, x, y, w, h float32, fillcolor color.RGBA) {
+	r := f32.Rect(x, y+h, x+w, y)
+	paint.ColorOp{Color: fillcolor}.Add(ops)
+	paint.PaintOp{Rect: r}.Add(ops)
+}
+
+func Border(left, top, right, bottom float32, col color.RGBA) Style {
+	return func(w layout.Widget) layout.Widget {
+		return func(gtx C) D {
+			m := op.Record(gtx.Ops)
+			dims := w(gtx)
+			call := m.Stop()
+
+			ops := gtx.Ops
+
+			defer op.Push(gtx.Ops).Pop()
+			w, h := float32(dims.Size.X), float32(dims.Size.Y)
+			if left > 0 {
+				drawRect(ops, 0, 0, left, h, col)
+			}
+			if top > 0 {
+				drawRect(ops, 0, 0, w, top, col)
+			}
+			if right > 0 && w > right {
+				drawRect(ops, w-right, 0, right, h, col)
+			}
+			if bottom > 0 && h > bottom {
+				drawRect(ops, 0, h-bottom, w, bottom, col)
+			}
+
+			call.Add(gtx.Ops)
+			return dims
 		}
 	}
 }
