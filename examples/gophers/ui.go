@@ -11,14 +11,11 @@ import (
 	"log"
 	"runtime"
 
-	"gioui.org/f32"
 	"gioui.org/font/gofont"
 	"gioui.org/gesture"
 	// "gioui.org/io/pointer"
 	"gioui.org/io/profile"
 	"gioui.org/layout"
-	"gioui.org/op"
-	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	//"gioui.org/text"
 	"gioui.org/unit"
@@ -245,31 +242,6 @@ func Avatar(u *user) layout.Widget {
 		img.Scale = float32(sz) / float32(gtx.Px(unit.Dp(float32(sz))))
 		return img.Layout(gtx)
 	}
-}
-
-type clipCircle struct {
-}
-
-func (c *clipCircle) Layout(gtx layout.Context, w layout.Widget) layout.Dimensions {
-	var m op.MacroOp
-	m.Record(gtx.Ops)
-	dims := w(gtx)
-	m.Stop()
-	max := dims.Size.X
-	if dy := dims.Size.Y; dy > max {
-		max = dy
-	}
-	szf := float32(max)
-	rr := szf * .5
-	var stack op.StackOp
-	stack.Push(gtx.Ops)
-	clip.Rect{
-		Rect: f32.Rectangle{Max: f32.Point{X: szf, Y: szf}},
-		NE:   rr, NW: rr, SE: rr, SW: rr,
-	}.Op(gtx.Ops).Add(gtx.Ops)
-	m.Add()
-	stack.Pop()
-	return dims
 }
 
 const longTextSample = `1. I learned from my grandfather, Verus, to use good manners, and to
