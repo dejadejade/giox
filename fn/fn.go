@@ -15,7 +15,7 @@ import (
 	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/unit"
-	//	"gioui.org/widget"
+	"gioui.org/widget"
 	"gioui.org/widget/material"
 )
 
@@ -53,9 +53,29 @@ func Margin4(left, top, right, bottom float32) Style {
 func Size(width, height float32) Style {
 	return func(w layout.Widget) layout.Widget {
 		return func(gtx C) D {
-			ww, hh := gtx.Px(unit.Dp(width)), gtx.Px(unit.Dp(height))
 			cs := gtx.Constraints
-			gtx.Constraints = layout.Exact(cs.Constrain(image.Point{X: ww, Y: hh}))
+			if width > 0 {
+				ww := gtx.Px(unit.Dp(width))
+				if ww < cs.Min.X {
+					ww = cs.Min.X
+				}
+				if ww > cs.Max.X {
+					ww = cs.Max.X
+				}
+				gtx.Constraints.Min.X = ww
+				gtx.Constraints.Max.X = ww
+			}
+			if height > 0 {
+				hh := gtx.Px(unit.Dp(height))
+				if hh < cs.Min.Y {
+					hh = cs.Min.Y
+				}
+				if hh > cs.Max.Y {
+					hh = cs.Max.Y
+				}
+				gtx.Constraints.Min.Y = hh
+				gtx.Constraints.Max.Y = hh
+			}
 			return w(gtx)
 		}
 	}
@@ -123,6 +143,31 @@ func OnClick(click *gesture.Click) Style {
 			pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
 			click.Add(gtx.Ops)
 			return dims
+		}
+	}
+}
+
+func Clickable(btn *widget.Clickable) Style {
+	return func(w layout.Widget) layout.Widget {
+		return func(gtx C) D {
+			return material.Clickable(gtx, btn, w)
+		}
+	}
+}
+
+func FillRect(col color.RGBA, sz image.Point) layout.Widget {
+	return func(gtx C) D {
+		w := gtx.Px(unit.Dp(float32(sz.X)))
+		h := gtx.Px(unit.Dp(float32(sz.Y)))
+		paint.ColorOp{Color: col}.Add(gtx.Ops)
+		paint.PaintOp{Rect: f32.Rectangle{
+			Max: f32.Point{
+				X: float32(w),
+				Y: float32(h),
+			},
+		}}.Add(gtx.Ops)
+		return layout.Dimensions{
+			Size: image.Point{X: w, Y: h},
 		}
 	}
 }
