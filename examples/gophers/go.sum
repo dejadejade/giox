@@ -2,6 +2,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 gioui.org v0.0.0-20200603192006-278e9bc33400 h1:QG9qer9g8UdLVIsq+hmLMPN01q9Aervrr03suFORCYA=
 gioui.org v0.0.0-20200603192006-278e9bc33400/go.mod h1:AHI9rFr6AEEHCb8EPVtb/p5M+NMJRKH58IOp8O3Je04=
+gioui.org v0.0.0-20200610092923-bb8bb504d829 h1:PXjoSNRvuLtq1svw6Kk0UnurdOdoIeZx0/MvrLD2BOI=
+gioui.org v0.0.0-20200610092923-bb8bb504d829/go.mod h1:AHI9rFr6AEEHCb8EPVtb/p5M+NMJRKH58IOp8O3Je04=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/dejadejade/giox v0.0.0-20200605064422-3eabfa7b8a46 h1:IlcJE2B0LnutWQb08plRVTS7dLxGlBn6IfkQyDRnTEk=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
