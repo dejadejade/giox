@@ -13,7 +13,8 @@ import (
 
 	"gioui.org/font/gofont"
 	"gioui.org/gesture"
-	// "gioui.org/io/pointer"
+	"gioui.org/io/key"
+	"gioui.org/io/pointer"
 	"gioui.org/io/profile"
 	"gioui.org/layout"
 	"gioui.org/op/paint"
@@ -155,13 +156,13 @@ func (u *UI) Layout(gtx layout.Context) {
 	if u.fab.Clicked() {
 		if u.selectedUser != nil {
 			u.selectedUser = nil
-		} 
+		}
 	}
 
 	if u.selectedUser != nil {
-		UserPage(u)(gtx)
+		UserPage(gtx, u)
 	} else {
-		Users(u)(gtx)
+		Users(gtx, u)
 	}
 
 	if u.profiling {
@@ -170,61 +171,65 @@ func (u *UI) Layout(gtx layout.Context) {
 	}
 }
 
-func UserPage(u *UI) layout.Widget {
+func UserPage(gtx C, u *UI) D {
 	up := u.selectedUser
-	content := fn.List(up.commitsList, nil, len(up.commits), func(gtx C, i int) D {
-		return Commit(up.user, up.commits[i].GetMessage())(gtx)
-	})
+	content := func(gtx C) D {
+		list := up.commitsList
+		if list.Dragging() {
+			key.HideInputOp{}.Add(gtx.Ops)
+		}
+		return list.Layout(gtx, len(up.commits), func(gtx C, i int) D {
+			return Commit(gtx, up.user, up.commits[i].GetMessage())
+		})
+	}
 
-	main := fn.Stack(layout.Stack{Alignment: layout.SE}, nil,
-		fn.StackChild{fn.Expanded(false), nil, content},
-		fn.StackChild{fn.Stacked(), []S{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon2).Layout},
-	)
-
-	return main
-}
-
-func Commit(user *user, msg string) layout.Widget {
-	return fn.Flex(layout.Flex{Axis: layout.Horizontal}, []S{fn.Border(0, 0, 0, 1, rgb(0xa0b0c0)), fn.Margin4(8, 16, 8, 8)},
-		fn.FlexChild{fn.Rigid(false), []S{fn.Rounded(48)}, Avatar(user)},
-		fn.FlexChild{fn.Flexed(1), []S{fn.Margin4(8, 0, 0, 0)}, fn.Label(material.Caption(theme, msg))},
+	return fn.Format(gtx, "stack(se)",
+		fn.Child("e(0)", content),
+		fn.Child(";inset(16)", material.IconButton(theme, u.fab, u.fabIcon2).Layout),
 	)
 }
 
-func User(user *user, click *gesture.Click) layout.Widget {
-	content := fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Middle}, []S{fn.Margin(8), fn.OnClick(click)},
-		fn.FlexChild{fn.Rigid(false), []S{fn.Margin(8), fn.Rounded(36)}, Avatar(user)},
-		fn.FlexChild{fn.Rigid(false), []S{fn.Border(0, 0, 0, 1, rgb(0xe0e0e0)), fn.Margin4(0, 0, 0, 16)}, 
-			fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,
-				fn.FlexChild{fn.Rigid(false), nil,
-					fn.Flex(layout.Flex{Axis: layout.Horizontal, Alignment: layout.Baseline}, nil,
-						fn.FlexChild{fn.Rigid(false), nil, material.Body1(theme, user.name).Layout},
-						fn.FlexChild{fn.Flexed(1), []S{fn.Direction(layout.E), fn.Margin4(2, 0, 0, 0)}, material.Caption(theme, "3 hours ago").Layout},
-					)},
-				fn.FlexChild{fn.Rigid(false), []S{fn.Margin4(0, 4, 0, 0)}, material.Caption(theme, user.company).Layout},
-			)},
-	)
-
-	return content
+func Commit(gtx C, user *user, msg string) D {
+	return fn.Format(gtx, "hflex;border(0,0,0,1,a0b0c0);inset(8,16,8,8)",
+		fn.Child(";rounded(48)", Avatar(user)),
+		fn.Child("f;inset(8,0,0,0)", material.Caption(theme, msg).Layout))
 }
 
-func Users(u *UI) layout.Widget {
-	content := fn.Flex(layout.Flex{Axis: layout.Vertical}, nil,
-		fn.FlexChild{fn.Rigid(true), []S{fn.Margin(16), fn.Size(400, 200)}, material.Editor(theme, u.edit, "Hint").Layout},
-		fn.FlexChild{fn.Rigid(true), []S{fn.Margin(16)}, material.Editor(theme, u.edit2, "Hint").Layout},
-		fn.FlexChild{fn.Rigid(false), []S{fn.Background(rgb(0xf2f2f2))}, fn.Styled(material.Caption(theme, "GOPHERS").Layout, fn.Margin(8))},
-		fn.FlexChild{fn.Flexed(1), nil,
-			fn.List(u.usersList, nil, len(u.users), func(gtx C, index int) D {
-				return User(u.users[index], &u.userClicks[index])(gtx)
-			})},
+func User(gtx C, user *user, click *gesture.Click) D {
+	dims := fn.Format(gtx, "hflex(middle);inset(8)",
+		fn.Child(";inset(8);rounded(36)", Avatar(user)),
+		fn.Child(";border(0,0,0,1,e0e0e0);inset(0,0,0,16)", fn.FormatF("vflex",
+			fn.Child("", fn.FormatF("hflex(baseline)",
+				fn.Child("", material.Body1(theme, user.name).Layout),
+				fn.Child("f(1);dir(e);inset(2,0,0,0)", material.Caption(theme, "3 hours ago").Layout)),
+			),
+			fn.Child(";inset(0,4,0,0)", material.Caption(theme, user.company).Layout),
+		)),
 	)
 
-	main := fn.Stack(layout.Stack{Alignment: layout.SE}, nil,
-		fn.StackChild{fn.Expanded(false), nil, content},
-		fn.StackChild{fn.Stacked(), []S{fn.Margin(16)}, material.IconButton(theme, u.fab, u.fabIcon).Layout},
+	pointer.Rect(image.Rectangle{Max: dims.Size}).Add(gtx.Ops)
+	click.Add(gtx.Ops)
+	return dims
+}
+
+func Users(gtx C, u *UI) D {
+	content := fn.FormatF("vflex",
+		fn.Child("r(1);inset(16);size(400,200)", material.Editor(theme, u.edit, "Hint").Layout),
+		fn.Child("r(1);inset(16)", material.Editor(theme, u.edit2, "Hint").Layout),
+		fn.Child("r;bkground(f2f2f2);inset(8)", material.Caption(theme, "GOPHERS").Layout),
+		fn.Child("f(1)", func(gtx C) D {
+			return u.usersList.Layout(gtx, len(u.users), func(gtx C, index int) D {
+				user := u.users[index]
+				click := &u.userClicks[index]
+				return User(gtx, user, click)
+			})
+		}),
 	)
 
-	return main
+	return fn.Format(gtx, "stack(se)",
+		fn.Child("e;", content),
+		fn.Child(";inset(16)", material.IconButton(theme, u.fab, u.fabIcon).Layout))
+
 }
 
 func Avatar(u *user) layout.Widget {

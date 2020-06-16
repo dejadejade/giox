@@ -81,6 +81,38 @@ func Size(width, height float32) Style {
 	}
 }
 
+type sizeS struct {
+	width, height float32
+}
+
+func (s sizeS) Layout(gtx C, w layout.Widget) D {
+	width, height := s.width, s.height
+	cs := gtx.Constraints
+	if width > 0 {
+		ww := gtx.Px(unit.Dp(width))
+		if ww < cs.Min.X {
+			ww = cs.Min.X
+		}
+		if ww > cs.Max.X {
+			ww = cs.Max.X
+		}
+		gtx.Constraints.Min.X = ww
+		gtx.Constraints.Max.X = ww
+	}
+	if height > 0 {
+		hh := gtx.Px(unit.Dp(height))
+		if hh < cs.Min.Y {
+			hh = cs.Min.Y
+		}
+		if hh > cs.Max.Y {
+			hh = cs.Max.Y
+		}
+		gtx.Constraints.Min.Y = hh
+		gtx.Constraints.Max.Y = hh
+	}
+	return w(gtx)
+}
+
 func Direction(d layout.Direction) Style {
 	return func(w layout.Widget) layout.Widget {
 		return func(gtx C) D {
@@ -123,6 +155,39 @@ func Border(left, top, right, bottom float32, col color.RGBA) Style {
 			return dims
 		}
 	}
+}
+
+type borderS struct {
+	left, top, right, bottom float32
+	col                      color.RGBA
+}
+
+func (s borderS) Layout(gtx C, widget layout.Widget) D {
+	m := op.Record(gtx.Ops)
+	dims := widget(gtx)
+	call := m.Stop()
+
+	ops := gtx.Ops
+
+	left, top, right, bottom := s.left, s.top, s.right, s.bottom
+	col := s.col
+	defer op.Push(gtx.Ops).Pop()
+	w, h := float32(dims.Size.X), float32(dims.Size.Y)
+	if left > 0 {
+		drawRect(ops, 0, 0, left, h, col)
+	}
+	if top > 0 {
+		drawRect(ops, 0, 0, w, top, col)
+	}
+	if right > 0 && w > right {
+		drawRect(ops, w-right, 0, right, h, col)
+	}
+	if bottom > 0 && h > bottom {
+		drawRect(ops, 0, h-bottom, w, bottom, col)
+	}
+
+	call.Add(gtx.Ops)
+	return dims
 }
 
 func Visible(v bool) Style {
@@ -192,6 +257,17 @@ func Background(col color.RGBA) Style {
 			StackChild{Stacked(), nil, w},
 		)
 	}
+}
+
+type backgroundS struct {
+	col color.RGBA
+}
+
+func (s backgroundS) Layout(gtx C, w layout.Widget) D {
+	return layout.Stack{}.Layout(gtx,
+		layout.Expanded(Fill(s.col)),
+		layout.Stacked(w),
+	)
 }
 
 func Rigid(expand bool) FlexChildFunc {
