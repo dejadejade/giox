@@ -9,7 +9,23 @@ func Format(gtx C, style string, children ...ChildSpec) D
 func Widget(gtx C, style string, w layout.Widget) D
 ```
 
-When creating a flex/stack the first section of the style is reserved for the container and the children. The parameters can be omitted when not applicable or default (0).
+When creating a flex/stack the first section of the style is reserved for the container and the children. The first section or its parameters can be omitted when not applicable or default (0).
+
+First section for container could be:
+
+```
+	hflex(params): Horizontal Flex
+	vflex(params): Vertical Flex
+	stack(params): Stack
+```
+
+First section for children could be
+
+```
+	f(weight) for Flexed FlexChild
+	e for  Expanded StackChild
+
+```
 
 Usage:
 
