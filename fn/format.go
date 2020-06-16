@@ -92,24 +92,29 @@ func alignmentFor(s string) (layout.Alignment, bool) {
 // border(0,0,0,0,color)
 // bkground(color)
 // dir(s/n/e/w/se)
-type Formatter struct {
-	Style  []string
-	Widget layout.Widget
-}
+type formatter ChildSpec
 
-func (f Formatter) Layout(gtx C) D {
-	style := f.Style
-	if len(style) == 0 {
-		return f.Widget(gtx)
-	}
-
-	s := style[0]
-	w := Formatter{style[1:], f.Widget}.Layout
-	if s == "" {
+func (f formatter) Layout(gtx C) D {
+	style := f.style
+	w := f.widget
+	if style == "" {
 		return w(gtx)
 	}
 
-	name, params := parseStyle(s)
+	var cur string
+	p := strings.IndexByte(style, ';')
+	if p >= 0 {
+		cur = style[:p]
+		w = formatter{style[p+1:], w}.Layout
+	} else {
+		cur = style
+	}
+
+	if cur == "" {
+		return w(gtx)
+	}
+
+	name, params := parseStyle(cur)
 	switch name {
 	case "inset":
 		if len(params) == 1 {
@@ -183,7 +188,7 @@ func formatFlex(gtx C, flex layout.Flex, style string, children ...ChildSpec) D 
 		p := strings.IndexByte(child.style, ';')
 		if p >= 0 {
 			ins = child.style[:p]
-			w = Formatter{strings.Split(child.style[p+1:], ";"), child.widget}.Layout
+			w = formatter{child.style[p+1:], child.widget}.Layout
 		}
 
 		var c layout.FlexChild
@@ -195,7 +200,7 @@ func formatFlex(gtx C, flex layout.Flex, style string, children ...ChildSpec) D 
 		widgets = append(widgets, c)
 	}
 
-	return Formatter{strings.Split(style, ";"), func(gtx C) D { return flex.Layout(gtx, widgets...) }}.Layout(gtx)
+	return formatter{style, func(gtx C) D { return flex.Layout(gtx, widgets...) }}.Layout(gtx)
 }
 
 func parseStack(attr []string) layout.Stack {
@@ -217,7 +222,7 @@ func formatStack(gtx C, stack layout.Stack, style string, children ...ChildSpec)
 		p := strings.IndexByte(child.style, ';')
 		if p >= 0 {
 			ins = child.style[:p]
-			w = Formatter{strings.Split(child.style[p+1:], ";"), child.widget}.Layout
+			w = formatter{child.style[p+1:], child.widget}.Layout
 		}
 
 		var c layout.StackChild
@@ -229,7 +234,7 @@ func formatStack(gtx C, stack layout.Stack, style string, children ...ChildSpec)
 		widgets = append(widgets, c)
 	}
 
-	return Formatter{strings.Split(style, ";"), func(gtx C) D { return stack.Layout(gtx, widgets...) }}.Layout(gtx)
+	return formatter{style, func(gtx C) D { return stack.Layout(gtx, widgets...) }}.Layout(gtx)
 }
 
 func Format(gtx C, style string, children ...ChildSpec) D {
@@ -261,5 +266,16 @@ func Format(gtx C, style string, children ...ChildSpec) D {
 func FormatF(style string, children ...ChildSpec) layout.Widget {
 	return func(gtx C) D {
 		return Format(gtx, style, children...)
+	}
+}
+
+func Widget(gtx C, style string, w layout.Widget) D {
+	return formatter{style, w}.Layout(gtx)
+}
+
+
+func WidgetF(style string, w layout.Widget) layout.Widget {
+	return func(gtx C) D {
+		return formatter{style, w}.Layout(gtx)
 	}
 }
