@@ -17,7 +17,6 @@ Usage:
 	fn.Format(gtx, "hflex;border(0,0,0,1,a0b0c0);inset(8,16,8,8)",
 		fn.Child(";rounded(48)", Avatar(user)),
 		fn.Child("f;inset(8,0,0,0)", material.Caption(theme, msg).Layout))
-}
 ```
 
 
