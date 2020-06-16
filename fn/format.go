@@ -1,13 +1,14 @@
 package fn
 
 import (
-	"gioui.org/layout"
-	"gioui.org/unit"
 	"image"
 	"image/color"
 	"log"
 	"strconv"
 	"strings"
+
+	"gioui.org/layout"
+	"gioui.org/unit"
 )
 
 type ChildSpec struct {
@@ -195,7 +196,12 @@ func formatFlex(gtx C, flex layout.Flex, style string, children ...ChildSpec) D 
 		if ins == "" || ins[0] != 'f' {
 			c = layout.Rigid(w)
 		} else {
-			c = layout.Flexed(1.0, w)
+			var weight float32 = 1.0
+			if _, params := parseStyle(ins); len(params) == 1 {
+				weight = atof(params[0])
+			}
+
+			c = layout.Flexed(weight, w)
 		}
 		widgets = append(widgets, c)
 	}
@@ -272,7 +278,6 @@ func FormatF(style string, children ...ChildSpec) layout.Widget {
 func Widget(gtx C, style string, w layout.Widget) D {
 	return formatter{style, w}.Layout(gtx)
 }
-
 
 func WidgetF(style string, w layout.Widget) layout.Widget {
 	return func(gtx C) D {
