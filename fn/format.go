@@ -121,7 +121,7 @@ func (f formatter) Layout(gtx C) D {
 		if len(params) == 1 {
 			return layout.UniformInset(unit.Dp(atof(params[0]))).Layout(gtx, w)
 		} else if len(params) == 4 {
-			return layout.Inset{unit.Dp(atof(params[0])), unit.Dp(atof(params[1])), unit.Dp(atof(params[2])), unit.Dp(atof(params[3]))}.Layout(gtx, w)
+			return layout.Inset{Left: unit.Dp(atof(params[0])), Top: unit.Dp(atof(params[1])), Right: unit.Dp(atof(params[2])), Bottom: unit.Dp(atof(params[3]))}.Layout(gtx, w)
 		}
 
 	case "size":
