@@ -26,7 +26,6 @@ type pdfPage struct {
 	loading bool
 	failed  bool
 	img     image.Image
-	imgOp   paint.ImageOp
 }
 
 type PDFDocument struct {
@@ -68,6 +67,10 @@ func (pdf *PDFDocument) NumPages() int {
 	return len(pdf.pages)
 }
 
+func (pdf *PDFDocument) unloadPage(idx int) {
+	pdf.pages[idx].img = nil
+}
+
 func (pdf *PDFDocument) Layout(gtx C) D {
 	w, h := gtx.Constraints.Max.X, gtx.Constraints.Max.Y
 	page := func(gtx C, idx int) D {
@@ -85,7 +88,12 @@ func (pdf *PDFDocument) Layout(gtx C) D {
 		return pdf.list.Layout(gtx, npages, page)
 	}
 
-	return view(gtx)
+	dims := view(gtx)
+	for i := 0; i < pdf.list.Position.First-1; i++ {
+		pdf.unloadPage(i)
+	}
+
+	return dims
 }
 
 func (page *pdfPage) Layout(gtx C, w, h int) D {
@@ -96,8 +104,6 @@ func (page *pdfPage) Layout(gtx C, w, h int) D {
 			if page.img, err = page.doc.renderPage(page.idx, 160.); err != nil {
 				log.Printf("Failed to render page %d: %v\n", page.idx, err)
 				page.failed = true
-			} else {
-				page.imgOp = paint.NewImageOp(page.img)
 			}
 			page.loading = false
 			page.doc.notify()
@@ -116,7 +122,7 @@ func (page *pdfPage) Layout(gtx C, w, h int) D {
 	}
 
 	mw, mh := int(w/px(gtx, 1)), int(h/px(gtx, 1))
-	op := page.imgOp
+	op := paint.NewImageOp(page.img)
 
 	var scale float32 = 1.0
 	sz := op.Size()
