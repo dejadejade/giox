@@ -98,6 +98,9 @@ type formatter ChildSpec
 func (f formatter) Layout(gtx C) D {
 	style := f.style
 	w := f.widget
+	if w == nil {
+		w = empty
+	}
 	if style == "" {
 		return w(gtx)
 	}
@@ -181,11 +184,20 @@ func parseFlex(axis layout.Axis, attr []string) layout.Flex {
 	return f
 }
 
+func empty(gtx C) D {
+	return D{}
+}
+
+var Empty = empty
+
 func formatFlex(gtx C, flex layout.Flex, style string, children ...ChildSpec) D {
 	var widgets []layout.FlexChild
 	for _, child := range children {
 		var ins string
 		w := child.widget
+		if w == nil {
+			w = empty
+		}
 		p := strings.IndexByte(child.style, ';')
 		if p >= 0 {
 			ins = child.style[:p]
@@ -225,6 +237,9 @@ func formatStack(gtx C, stack layout.Stack, style string, children ...ChildSpec)
 	for _, child := range children {
 		var ins string
 		w := child.widget
+		if w == nil {
+			w = empty
+		}
 		p := strings.IndexByte(child.style, ';')
 		if p >= 0 {
 			ins = child.style[:p]
